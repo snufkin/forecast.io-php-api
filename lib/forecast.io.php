@@ -8,27 +8,25 @@ class ForecastIO{
   private $api_key;
   const API_ENDPOINT = 'https://api.forecast.io/forecast/';
 
-
   /**
    * Create a new instance
    *
    * @param String $api_key
    */
-  function __construct($api_key) {
-
+  function __construct($api_key, $units = 'si') {
     $this->api_key = $api_key;
-
-
+    $this->units = $units;
   }
 
 
-  private function requestData($latitude, $longitude, $options = array(), $timestamp = false) {
+  private function requestData($latitude, $longitude, $timestamp = false, $exclusions = false) {
 
     $request_url = self::API_ENDPOINT .
         $this->api_key . '/' .
         $latitude . ',' . $longitude .
         ( $timestamp ? ',' . $timestamp : '' ) .
-        http_build_query($options);
+        '?units=' . $this->units .
+        ( $exclusions ? '&exclude=' . $exclusions : '' );
 
     // $content = file_get_contents($request_url);
     $curl = curl_init($request_url);
@@ -40,7 +38,6 @@ class ForecastIO{
     curl_close($curl);
 
     if (!empty($content)) {
-
       return json_decode($content);
 
     } else {
